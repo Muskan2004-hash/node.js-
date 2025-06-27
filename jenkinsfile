@@ -1,0 +1,26 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Clone Repo') {
+            steps {
+                git 'https://github.com/Muskan2004-hash/node.js-.git'
+            }
+        }
+
+        stage('Deploy to EC2') {
+            steps {
+                sshagent(['deploy-key']) {
+                    sh '''
+                    ssh -o StrictHostKeyChecking=no ubuntu@3.109.23.138 << 'EOF'
+                    cd ~/fileinfoapp
+                    git pull
+                    docker-compose down
+                    docker-compose up -d --build
+                    EOF
+                    '''
+                }
+            }
+        }
+    }
+}
