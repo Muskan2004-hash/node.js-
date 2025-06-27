@@ -1,0 +1,20 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>File Info Viewer</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <h1>Upload a File</h1>
+  <form action="/upload" method="POST" enctype="multipart/form-data">
+    <input type="file" name="file" required />
+    <button type="submit">Get Info</button>
+  </form>
+
+  <% if (info) { %>
+    <h2>File Info:</h2>
+    <pre><%= JSON.stringify(info, null, 2) %></pre>
+  <% } %>
+</body>
+</html>
