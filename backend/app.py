@@ -11,7 +11,7 @@ s3 = boto3.client('s3')
 BUCKET = os.environ.get('S3_BUCKET', 'file-info-bucket')
 
 # MongoDB Setup
-mongo_client = MongoClient("mongodb://<MONGO_EC2_IP>:27017/")
+mongo_client = MongoClient("mongodb://13.235.116.123:27017/")
 db = mongo_client["fileinfo_db"]
 collection = db["files"]
 
