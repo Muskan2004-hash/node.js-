@@ -11,18 +11,19 @@ pipeline {
         stage('Deploy to EC2') {
             steps {
                 sshagent(['deploy-key']) {
-                    sh '''
-                    ssh -o StrictHostKeyChecking=no ubuntu@3.109.23.138 << 'EOF'
-                    cd ~/fileinfoapp
-                    git pull
-                    docker-compose down
-                    docker-compose up -d --build
-                    EOF
-                    '''
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ubuntu@3.109.23.138 << 'ENDSSH'
+                        cd ~/fileinfoapp
+                        git pull
+                        docker-compose down
+                        docker-compose up -d --build
+                        ENDSSH
+                    """
                 }
             }
         }
     }
 }
+
 
   
