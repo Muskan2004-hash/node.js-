@@ -1,7 +1,15 @@
-
 version: '3.8'
 
 services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - app-net
+
   backend:
     build: ./backend
     ports:
@@ -11,10 +19,24 @@ services:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
-
-  frontend:
-    build: ./frontend
-    ports:
-      - "3000:3000"
+      - MONGO_URI=mongodb://mongodb:27017/    # ← connect to MongoDB service
     depends_on:
-      - backend
+      - mongodb
+    networks:
+      - app-net
+
+  mongodb:
+    image: mongo:6
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - app-net
+
+volumes:
+  mongo-data:
+
+networks:
+  app-net:
