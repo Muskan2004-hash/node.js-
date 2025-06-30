@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from pymongo import MongoClient
 from werkzeug.utils import secure_filename
+from io import BytesIO
 import os
 import boto3
 
@@ -11,7 +12,6 @@ s3 = boto3.client('s3')
 BUCKET = os.environ.get('S3_BUCKET', 'file-info-bucket')
 
 # === MongoDB Setup ===
-# Use environment variable or default to localhost
 mongo_uri = os.environ.get("MONGO_URI", "mongodb://localhost:27017/")
 mongo_client = MongoClient(mongo_uri)
 db = mongo_client["fileinfo_db"]
@@ -30,15 +30,15 @@ def upload_file():
     filename = secure_filename(file.filename)
 
     try:
-        # Upload to S3
-        s3.upload_fileobj(file, BUCKET, filename)
-
-        # Get actual size
-        file.seek(0, os.SEEK_END)
-        size = file.tell()
+        # Read the file content into memory
+        file_content = file.read()
         file_ext = os.path.splitext(filename)[1]
+        size = len(file_content)
 
-        # Save to MongoDB
+        # Upload to S3 using BytesIO
+        s3.upload_fileobj(BytesIO(file_content), BUCKET, filename)
+
+        # Save file metadata to MongoDB
         file_data = {
             "filename": filename,
             "extension": file_ext,
@@ -76,3 +76,5 @@ def file_info():
 # === Run App ===
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
+
+    
