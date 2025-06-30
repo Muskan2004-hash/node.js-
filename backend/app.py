@@ -39,19 +39,47 @@ def upload_file():
         with open(temp_path, "rb") as f:
             s3.upload_fileobj(f, BUCKET, filename)
 
-        # File info
+        # Get file extension
         file_ext = os.path.splitext(filename)[1]
+
+        # Save metadata to MongoDB
         file_data = {
             "filename": filename,
             "extension": file_ext,
             "size": f"{size} bytes"
         }
-
-        # Save metadata to MongoDB
         collection.insert_one(file_data)
 
-        # Clean up temp file
+        # Delete temporary file
         os.remove(temp_path)
 
         return jsonify({
             'message': 'Uploaded to S3 and saved to MongoDB',
+            **file_data
+        }), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# === Retrieve File Info Endpoint ===
+@app.route('/fileinfo', methods=['POST'])
+def file_info():
+    data = request.get_json()
+    filename = data.get('filename')
+
+    if not filename:
+        return jsonify({'error': 'No filename provided'}), 400
+
+    result = collection.find_one({"filename": filename})
+    if result:
+        result['_id'] = str(result['_id'])  # Convert ObjectId to string for JSON
+        return jsonify(result), 200
+    else:
+        return jsonify({'error': 'File not found in MongoDB'}), 404
+
+# === Run Flask App ===
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=5000)
+
+
+        
