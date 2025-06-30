@@ -30,13 +30,13 @@ def upload_file():
     filename = secure_filename(file.filename)
 
     try:
-        # Save file temporarily to get size
-        filepath = os.path.join("/tmp", filename)
-        file.save(filepath)
-        size = os.path.getsize(filepath)
+        # Save file temporarily to calculate size
+        temp_path = os.path.join("/tmp", filename)
+        file.save(temp_path)
+        size = os.path.getsize(temp_path)
 
         # Upload to S3
-        with open(filepath, "rb") as f:
+        with open(temp_path, "rb") as f:
             s3.upload_fileobj(f, BUCKET, filename)
 
         # File info
@@ -47,35 +47,11 @@ def upload_file():
             "size": f"{size} bytes"
         }
 
-        # Save to MongoDB
+        # Save metadata to MongoDB
         collection.insert_one(file_data)
-        os.remove(filepath)
+
+        # Clean up temp file
+        os.remove(temp_path)
 
         return jsonify({
             'message': 'Uploaded to S3 and saved to MongoDB',
-            **file_data
-        }), 200
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-# === Retrieve File Info ===
-@app.route('/fileinfo', methods=['POST'])
-def file_info():
-    data = request.get_json()
-    filename = data.get('filename')
-
-    if not filename:
-        return jsonify({'error': 'No filename provided'}), 400
-
-    result = collection.find_one({"filename": filename})
-    if result:
-        result['_id'] = str(result['_id'])  # Convert ObjectId to string
-        return jsonify(result), 200
-    else:
-        return jsonify({'error': 'File not found in MongoDB'}), 404
-
-# === Run App ===
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
-
