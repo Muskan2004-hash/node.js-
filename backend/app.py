@@ -1,9 +1,9 @@
 from flask import Flask, request, jsonify
 from pymongo import MongoClient
 from werkzeug.utils import secure_filename
-from io import BytesIO
 import os
 import boto3
+from bson import ObjectId
 
 app = Flask(__name__)
 
@@ -30,21 +30,26 @@ def upload_file():
     filename = secure_filename(file.filename)
 
     try:
-        # Read the file content into memory
-        file_content = file.read()
+        # Save file temporarily to get size
+        filepath = os.path.join("/tmp", filename)
+        file.save(filepath)
+        size = os.path.getsize(filepath)
+
+        # Upload to S3
+        with open(filepath, "rb") as f:
+            s3.upload_fileobj(f, BUCKET, filename)
+
+        # File info
         file_ext = os.path.splitext(filename)[1]
-        size = len(file_content)
-
-        # Upload to S3 using BytesIO
-        s3.upload_fileobj(BytesIO(file_content), BUCKET, filename)
-
-        # Save file metadata to MongoDB
         file_data = {
             "filename": filename,
             "extension": file_ext,
             "size": f"{size} bytes"
         }
+
+        # Save to MongoDB
         collection.insert_one(file_data)
+        os.remove(filepath)
 
         return jsonify({
             'message': 'Uploaded to S3 and saved to MongoDB',
@@ -65,11 +70,8 @@ def file_info():
 
     result = collection.find_one({"filename": filename})
     if result:
-        return jsonify({
-            'filename': result['filename'],
-            'extension': result['extension'],
-            'size': result['size']
-        })
+        result['_id'] = str(result['_id'])  # Convert ObjectId to string
+        return jsonify(result), 200
     else:
         return jsonify({'error': 'File not found in MongoDB'}), 404
 
@@ -77,4 +79,3 @@ def file_info():
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
 
-    
