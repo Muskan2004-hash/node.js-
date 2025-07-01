@@ -42,10 +42,14 @@ A full-stack web application where users can upload files, and the system stores
 ├── 🐳 docker-compose.yml       → Orchestrates frontend, backend, and MongoDB containers
 ├── 🛠️ Jenkinsfile  
 
+
+
 🧪 API Endpoints
-Method	Endpoint	   Description
-POST	 /upload	    Upload file to S3 + save to DB
-POST	 /fileinfo      Retrieve file metadata from DB
+| Method | Endpoint    | Description                    |
+| ------ | ----------- | ------------------------------ |
+| POST   | `/upload`   | Upload file to S3 + save to DB |
+| POST   | `/fileinfo` | Retrieve file metadata from DB |
+
 
 
 ✅ Jenkins Pipeline (Deployment)
