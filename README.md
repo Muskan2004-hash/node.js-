@@ -58,5 +58,9 @@ POST	 /fileinfo      Retrieve file metadata from DB
 
    4. Runs docker-compose to deploy the app
 
+                     
+📌 Author
+
+Muskan @Muskan2004-hash
  
  
