@@ -4,7 +4,7 @@ pipeline {
     environment {
         AWS_ACCESS_KEY_ID = credentials('aws-access-key-id')
         AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
-        AWS_DEFAULT_REGION = 'ap-south-1'  // Adjust if needed
+        AWS_DEFAULT_REGION = 'ap-south-1'
     }
 
     stages {
@@ -17,19 +17,19 @@ pipeline {
         stage('Deploy to EC2') {
             steps {
                 sshagent(['deploy-key']) {
-                    sh """#!/bin/bash
-                        ssh -o StrictHostKeyChecking=no ubuntu@3.109.23.138 << 'ENDSSH'
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ubuntu@3.109.23.138 'bash -s' << 'EOF'
                             cd ~/fileinfoapp
                             git pull origin main
                             echo "REBUILDING SERVICES..."
-                            export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-                            export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-                            export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+                            export AWS_ACCESS_KEY_ID=\${AWS_ACCESS_KEY_ID}
+                            export AWS_SECRET_ACCESS_KEY=\${AWS_SECRET_ACCESS_KEY}
+                            export AWS_DEFAULT_REGION=\${AWS_DEFAULT_REGION}
                             export S3_BUCKET=file-info-bucket
                             export MONGO_URI=mongodb://mongodb:27017/
                             docker-compose down
                             docker-compose up -d --build
-                        ENDSSH
+                        EOF
                     """
                 }
             }
