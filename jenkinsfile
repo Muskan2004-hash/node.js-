@@ -27,3 +27,12 @@ pipeline {
                             export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
                             export S3_BUCKET=file-info-bucket
                             export MONGO_URI=mongodb://mongodb:27017/
+                            docker-compose down
+                            docker-compose up -d --build
+                        ENDSSH
+                    """
+                }
+            }
+        }
+    }
+}
