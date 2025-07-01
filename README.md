@@ -34,21 +34,19 @@ A full-stack web application where users can upload files, and the system stores
 📦 Folder Structure
 
 fileinfoapp/
-│
 ├── backend/
-│   └── app.py             # Flask backend for upload and info
-│
+│ └── app.py # Flask backend for file upload and info
 ├── frontend/
-│   └── views/
-│       └── index.ejs      # File upload form
-│
-├── docker-compose.yml     # Multi-container orchestration
-└── Jenkinsfile            # CI/CD pipeline script
+│ └── views/
+│ └── index.ejs # EJS file upload form
+├── docker-compose.yml # Multi-container orchestration
+├── Jenkinsfile # CI/CD pipeline script 
+
 
 🧪 API Endpoints
-Method	|Endpoint	   |Description
-POST	  | /upload	   | Upload file to S3 + save to DB
-POST	  | /fileinfo  | Retrieve file metadata from DB
+Method	Endpoint	   Description
+POST	 /upload	    Upload file to S3 + save to DB
+POST	 /fileinfo      Retrieve file metadata from DB
 
 
 ✅ Jenkins Pipeline (Deployment)
